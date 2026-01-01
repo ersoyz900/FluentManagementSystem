@@ -1,6 +1,6 @@
 # Project Management System (Fluent UI and Blazor)
 
-Bu proje, .NET 8 ve Microsoft Fluent UI kullanılarak geliştirilmiş bir **Proje ve Görev Yönetimi** uygulamasıdır. Standart HTML tabanlı yapıdan, tamamen bileşen tabanlı modern bir kullanıcı arayüzü mimarisine geçiş hedeflenerek yapılandırılmıştır.
+Bu proje, .NET 8 ve Microsoft Fluent UI kullanılarak geliştirilmiş bir **Proje ve Görev Yönetimi** uygulamasıdır. Standart tabanlı yapıdan,  bileşen tabanlı modern bir kullanıcı arayüzü mimarisine geçiş hedeflenerek yapılandırılmıştır.
 
 ---
 
