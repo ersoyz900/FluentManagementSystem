@@ -1,0 +1,88 @@
+﻿@page "/"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+
+<PageTitle>Ana Sayfa - Yönetim Paneli</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="25">
+
+    <div>
+        <FluentLabel Typo="Typography.H2" Color="Color.Accent">Sistem Özet Paneli</FluentLabel>
+        <FluentLabel Typo="Typography.Body">Hoş geldiniz. Proje ve görevlerinizdeki son durumu buradan takip edebilirsiniz.</FluentLabel>
+    </div>
+
+    <FluentGrid Spacing="3" AdaptiveRendering="true">
+
+        @* Projeler Kartı *@
+        <FluentGridItem xs="12" sm="4">
+            <FluentCard Style="padding: 20px; border-top: 4px solid var(--accent-fill-rest);">
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="15">
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size32.Folder())" Color="Color.Accent" />
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
+                        <FluentLabel Typo="Typography.H3">@projeSayisi</FluentLabel>
+                        <FluentLabel Typo="Typography.Body">Toplam Proje</FluentLabel>
+                    </FluentStack>
+                </FluentStack>
+            </FluentCard>
+        </FluentGridItem>
+
+        @* Görevler Kartı - ClipboardTask hatası için Clipboard kullanıldı *@
+        <FluentGridItem xs="12" sm="4">
+            <FluentCard Style="padding: 20px; border-top: 4px solid #28a745;">
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="15">
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size32.Clipboard())" Color="Color.Success" />
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
+                        <FluentLabel Typo="Typography.H3">@gorevSayisi</FluentLabel>
+                        <FluentLabel Typo="Typography.Body">Aktif Görevler</FluentLabel>
+                    </FluentStack>
+                </FluentStack>
+            </FluentCard>
+        </FluentGridItem>
+
+        @* Kullanıcılar Kartı *@
+        <FluentGridItem xs="12" sm="4">
+            <FluentCard Style="padding: 20px; border-top: 4px solid #ffc107;">
+                <FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center" HorizontalGap="15">
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size32.People())" Color="Color.Warning" />
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="0">
+                        <FluentLabel Typo="Typography.H3">@kullaniciSayisi</FluentLabel>
+                        <FluentLabel Typo="Typography.Body">Kayıtlı Kullanıcı</FluentLabel>
+                    </FluentStack>
+                </FluentStack>
+            </FluentCard>
+        </FluentGridItem>
+
+    </FluentGrid>
+
+    <FluentLabel Typo="Typography.H4" Style="margin-top: 10px;">Hızlı İşlemler</FluentLabel>
+    <FluentCard Style="padding: 20px;">
+        <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+            <FluentAnchor Appearance="Appearance.Outline" Href="/projeler/create">Yeni Proje Başlat</FluentAnchor>
+            <FluentAnchor Appearance="Appearance.Outline" Href="/gorevler/create">Görev Tanımla</FluentAnchor>
+            <FluentAnchor Appearance="Appearance.Outline" Href="/kullanicilar/create">Kullanıcı Ekle</FluentAnchor>
+        </FluentStack>
+    </FluentCard>
+
+</FluentStack>
+
+@code {
+    private int projeSayisi = 0;
+    private int gorevSayisi = 0;
+    private int kullaniciSayisi = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            projeSayisi = await DbContext.Projelers.CountAsync();
+            gorevSayisi = await DbContext.Gorevlers.CountAsync();
+            kullaniciSayisi = await DbContext.Kullanicilars.CountAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Veri yükleme hatası: " + ex.Message);
+        }
+    }
+}

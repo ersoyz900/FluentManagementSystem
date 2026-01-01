@@ -1,0 +1,50 @@
+﻿@page "/kategoriler/create"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Yeni Kategori</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentBreadcrumb>
+        <FluentBreadcrumbItem OnClick="@(() => NavManager.NavigateTo("/kategoriler"))">Kategoriler</FluentBreadcrumbItem>
+        <FluentBreadcrumbItem>Yeni Tanımlama</FluentBreadcrumbItem>
+    </FluentBreadcrumb>
+
+    <FluentLabel Typo="Typography.H3">Yeni Kategori Ekle</FluentLabel>
+
+    <FluentCard Style="max-width: 500px; padding: 25px;">
+        <EditForm Model="@yeniKategori" OnValidSubmit="Kaydet">
+            <DataAnnotationsValidator />
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                <FluentTextField @bind-Value="yeniKategori.KategoriAd" Label="Kategori Adı" Required="true" Style="width: 100%;" />
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack HorizontalGap="10">
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"
+                                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                        Kaydet
+                    </FluentButton>
+                    <FluentButton OnClick="@(() => NavManager.NavigateTo("/kategoriler"))">İptal</FluentButton>
+                </FluentStack>
+
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private Kategoriler yeniKategori = new();
+
+    private async Task Kaydet()
+    {
+        DbContext.Kategorilers.Add(yeniKategori);
+        await DbContext.SaveChangesAsync();
+        ToastService.ShowSuccess("Kategori başarıyla eklendi.");
+        NavManager.NavigateTo("/kategoriler");
+    }
+}

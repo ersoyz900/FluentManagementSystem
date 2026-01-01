@@ -1,0 +1,51 @@
+﻿@page "/oncelikler/create"
+@using FluentManagementSystem.Models
+@using Microsoft.FluentUI.AspNetCore.Components
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+
+<PageTitle>Yeni Öncelik</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentLabel Typo="Typography.H3">Yeni Öncelik Tanımla</FluentLabel>
+
+    <FluentCard Style="max-width: 450px; padding: 20px;">
+        <EditForm Model="@oncelik" OnValidSubmit="Kaydet">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                <FluentTextField @bind-Value="oncelik.OncelikAd"
+                                 Label="Öncelik Seviyesi (Örn: Acil)"
+                                 Required="true"
+                                 Style="width: 100%;" />
+
+                <FluentTextField @bind-Value="oncelik.RenkKodu"
+                                 Label="Renk (HEX Kodu)"
+                                 Placeholder="#RRGGBB"
+                                 Style="width: 100%;" />
+
+                <FluentDivider Style="width: 100%; margin: 10px 0;" />
+
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                    <FluentButton Type="ButtonType.Submit"
+                                  Appearance="Appearance.Accent"
+                                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                        Tanımla
+                    </FluentButton>
+                    <FluentButton OnClick="@(() => NavManager.NavigateTo("/oncelikler"))">İptal</FluentButton>
+                </FluentStack>
+
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private OncelikDurumlari oncelik = new();
+
+    private async Task Kaydet()
+    {
+        DbContext.OncelikDurumlaris.Add(oncelik);
+        await DbContext.SaveChangesAsync();
+        NavManager.NavigateTo("/oncelikler");
+    }
+}

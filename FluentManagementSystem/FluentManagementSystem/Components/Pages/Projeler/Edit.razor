@@ -1,0 +1,78 @@
+﻿@page "/projeler/edit/{ProjeNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+
+<PageTitle>Projeyi Düzenle</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentLabel Typo="Typography.H3">Proje Bilgilerini Güncelle</FluentLabel>
+        <FluentSpacer />
+        <FluentButton Appearance="Appearance.Stealth"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowLeft())"
+                      OnClick="@(() => NavManager.NavigateTo("/projeler"))">
+            Listeye Dön
+        </FluentButton>
+    </FluentStack>
+
+    <FluentDivider Style="width: 100%;" />
+
+    @if (proje == null)
+    {
+        <FluentProgressRing>Proje bilgileri yükleniyor...</FluentProgressRing>
+    }
+    else
+    {
+        <FluentCard Style="max-width: 600px; padding: 25px;">
+            <EditForm Model="@proje" OnValidSubmit="Kaydet">
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                    <FluentTextField @bind-Value="proje.ProjeAd" Label="Proje Adı" Required="true" Style="width: 100%;" />
+
+                    <FluentDatePicker @bind-Value="proje.OlusturmaTarihi" Label="Başlangıç Tarihi" Style="width: 100%;" />
+
+                    <FluentCheckbox @bind-Value="aktifMiGecici" Label="Proje Aktif Mi?" />
+
+                    <FluentDivider Style="width: 100%; margin: 10px 0;" />
+
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                        <FluentButton Type="ButtonType.Submit"
+                                      Appearance="Appearance.Accent"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                            Değişiklikleri Kaydet
+                        </FluentButton>
+                        <FluentButton OnClick="@(() => NavManager.NavigateTo("/projeler"))">İptal</FluentButton>
+                    </FluentStack>
+                </FluentStack>
+            </EditForm>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int ProjeNo { get; set; }
+    private Projeler? proje;
+    private bool aktifMiGecici;
+
+    protected override async Task OnInitializedAsync()
+    {
+        proje = await DbContext.Projelers.FindAsync(ProjeNo);
+        if (proje != null)
+        {
+            aktifMiGecici = proje.AktifMi ?? false;
+        }
+    }
+
+    private async Task Kaydet()
+    {
+        if (proje != null)
+        {
+            proje.AktifMi = aktifMiGecici;
+            await DbContext.SaveChangesAsync();
+            NavManager.NavigateTo("/projeler");
+        }
+    }
+}

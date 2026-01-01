@@ -1,0 +1,68 @@
+﻿@page "/projeler"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+
+<PageTitle>Proje Yönetimi</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentLabel Typo="Typography.H3">Projeler</FluentLabel>
+        <FluentSpacer />
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Add())"
+                      OnClick="@(() => NavManager.NavigateTo("/projeler/create"))">
+            Yeni Proje
+        </FluentButton>
+    </FluentStack>
+
+    <FluentCard Style="padding: 0;">
+        @if (ProjeListesi == null)
+        {
+            <FluentProgressRing Style="margin: 20px;">Yükleniyor...</FluentProgressRing>
+        }
+        else
+        {
+            <FluentDataGrid Items="@ProjeListesi" TGridItem="Projeler">
+                <PropertyColumn Property="@(p => p.ProjeNo)" Title="No" Sortable="true" />
+                <PropertyColumn Property="@(p => p.ProjeAd)" Title="Proje Adı" Sortable="true" />
+                <PropertyColumn Property="@(p => p.OlusturmaTarihi)" Title="Oluşturma" Format="dd.MM.yyyy" />
+
+                <TemplateColumn Title="Durum">
+                    @if (context.AktifMi == true)
+                    {
+                        <FluentBadge Appearance="Appearance.Accent">Aktif</FluentBadge>
+                    }
+                    else
+                    {
+                        <FluentBadge Appearance="Appearance.Neutral">Pasif</FluentBadge>
+                    }
+                </TemplateColumn>
+
+                <TemplateColumn Title="İşlemler" Align="Align.End">
+                    <FluentStack HorizontalGap="5">
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())"
+                                      OnClick="@(() => NavManager.NavigateTo($"/projeler/edit/{context.ProjeNo}"))" />
+
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
+                                      Color="Color.Error"
+                                      OnClick="@(() => NavManager.NavigateTo($"/projeler/delete/{context.ProjeNo}"))" />
+                    </FluentStack>
+                </TemplateColumn>
+            </FluentDataGrid>
+        }
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private IQueryable<Projeler>? ProjeListesi;
+
+    protected override void OnInitialized()
+    {
+        ProjeListesi = DbContext.Projelers.AsNoTracking().AsQueryable();
+    }
+}

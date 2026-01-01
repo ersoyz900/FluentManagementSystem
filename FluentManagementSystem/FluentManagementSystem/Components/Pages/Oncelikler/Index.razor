@@ -1,0 +1,62 @@
+﻿@page "/oncelikler"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+
+<PageTitle>Öncelik Yönetimi</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentLabel Typo="Typography.H3">Öncelik Seviyeleri</FluentLabel>
+        <FluentSpacer />
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Flag())"
+                      OnClick="@(() => NavManager.NavigateTo("/oncelikler/create"))">
+            Yeni Öncelik
+        </FluentButton>
+    </FluentStack>
+
+    <FluentCard Style="padding: 0;">
+        @if (OncelikListesi == null)
+        {
+            <FluentProgressRing Style="margin: 20px;">Yükleniyor...</FluentProgressRing>
+        }
+        else
+        {
+            <FluentDataGrid Items="@OncelikListesi" TGridItem="OncelikDurumlari">
+                <PropertyColumn Property="@(o => o.OncelikNo)" Title="No" Sortable="true" />
+                <PropertyColumn Property="@(o => o.OncelikAd)" Title="Öncelik Adı" Sortable="true" />
+                <TemplateColumn Title="Renk">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background-color: @context.RenkKodu; border: 1px solid #ccc;"></div>
+                        <span>@context.RenkKodu</span>
+                    </div>
+                </TemplateColumn>
+
+                <TemplateColumn Title="İşlemler" Align="Align.End">
+                    <FluentStack HorizontalGap="5">
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())"
+                                      OnClick="@(() => NavManager.NavigateTo($"/oncelikler/edit/{context.OncelikNo}"))" />
+
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
+                                      Color="Color.Error"
+                                      OnClick="@(() => NavManager.NavigateTo($"/oncelikler/delete/{context.OncelikNo}"))" />
+                    </FluentStack>
+                </TemplateColumn>
+            </FluentDataGrid>
+        }
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private IQueryable<OncelikDurumlari>? OncelikListesi;
+
+    protected override void OnInitialized()
+    {
+        OncelikListesi = DbContext.OncelikDurumlaris.AsNoTracking().AsQueryable();
+    }
+}

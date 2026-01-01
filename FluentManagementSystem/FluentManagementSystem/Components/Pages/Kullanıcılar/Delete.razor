@@ -1,0 +1,67 @@
+﻿@page "/kullanicilar/edit/{KullaniciNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Kullanıcı Düzenle</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentBreadcrumb>
+        <FluentBreadcrumbItem OnClick="@(() => NavManager.NavigateTo("/kullanicilar"))">Kullanıcı Listesi</FluentBreadcrumbItem>
+        <FluentBreadcrumbItem>Bilgileri Güncelle</FluentBreadcrumbItem>
+    </FluentBreadcrumb>
+
+    <FluentLabel Typo="Typography.H3">Kullanıcı Güncelle</FluentLabel>
+
+    @if (kullanici == null)
+    {
+        <FluentProgressRing>Yükleniyor...</FluentProgressRing>
+    }
+    else
+    {
+        <FluentCard Style="max-width: 500px; padding: 25px;">
+            <EditForm Model="@kullanici" OnValidSubmit="Kaydet">
+                <DataAnnotationsValidator />
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                    <FluentTextField @bind-Value="kullanici.AdSoyad" Label="Ad Soyad" Required="true" Style="width: 100%;" />
+
+                    <FluentTextField @bind-Value="kullanici.Eposta" Label="E-Posta Adresi" TextFieldType="TextFieldType.Email" Style="width: 100%;" />
+
+                    <FluentDivider Style="width: 100%;" />
+
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                            Güncelle
+                        </FluentButton>
+                        <FluentButton OnClick="@(() => NavManager.NavigateTo("/kullanicilar"))">Vazgeç</FluentButton>
+                    </FluentStack>
+
+                </FluentStack>
+            </EditForm>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int KullaniciNo { get; set; }
+    private Kullanicilar? kullanici;
+
+    protected override async Task OnInitializedAsync()
+    {
+        kullanici = await DbContext.Kullanicilars.FindAsync(KullaniciNo);
+    }
+
+    private async Task Kaydet()
+    {
+        if (kullanici != null)
+        {
+            await DbContext.SaveChangesAsync();
+            ToastService.ShowSuccess("Kullanıcı bilgileri güncellendi.");
+            NavManager.NavigateTo("/kullanicilar");
+        }
+    }
+}

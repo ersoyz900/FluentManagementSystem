@@ -1,0 +1,62 @@
+﻿@page "/kategoriler/edit/{KategoriNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Kategori Düzenle</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentBreadcrumb>
+        <FluentBreadcrumbItem OnClick="@(() => NavManager.NavigateTo("/kategoriler"))">Kategoriler</FluentBreadcrumbItem>
+        <FluentBreadcrumbItem>Düzenle</FluentBreadcrumbItem>
+    </FluentBreadcrumb>
+
+    <FluentLabel Typo="Typography.H3">Kategoriyi Güncelle</FluentLabel>
+
+    @if (kategori == null)
+    {
+        <FluentProgressRing>Yükleniyor...</FluentProgressRing>
+    }
+    else
+    {
+        <FluentCard Style="max-width: 500px; padding: 25px;">
+            <EditForm Model="@kategori" OnValidSubmit="Guncelle">
+                <DataAnnotationsValidator />
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                    <FluentTextField @bind-Value="kategori.KategoriAd" Label="Kategori Adı" Required="true" Style="width: 100%;" />
+
+                    <FluentDivider Style="width: 100%;" />
+
+                    <FluentStack HorizontalGap="10">
+                        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                            Güncelle
+                        </FluentButton>
+                        <FluentButton OnClick="@(() => NavManager.NavigateTo("/kategoriler"))">Vazgeç</FluentButton>
+                    </FluentStack>
+
+                </FluentStack>
+            </EditForm>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int KategoriNo { get; set; }
+    private Kategoriler? kategori;
+
+    protected override async Task OnInitializedAsync()
+    {
+        kategori = await DbContext.Kategorilers.FindAsync(KategoriNo);
+    }
+
+    private async Task Guncelle()
+    {
+        await DbContext.SaveChangesAsync();
+        ToastService.ShowSuccess("Kategori güncellendi.");
+        NavManager.NavigateTo("/kategoriler");
+    }
+}

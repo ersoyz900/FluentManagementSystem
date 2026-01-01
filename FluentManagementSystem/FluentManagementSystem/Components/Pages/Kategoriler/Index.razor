@@ -1,0 +1,60 @@
+﻿@page "/kategoriler"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject NavigationManager NavManager
+
+<PageTitle>Kategoriler</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentLabel Typo="Typography.H3">Kategori Tanımlamaları</FluentLabel>
+        <FluentSpacer />
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Tag())"
+                      OnClick="@(() => NavManager.NavigateTo("/kategoriler/create"))">
+            Yeni Kategori
+        </FluentButton>
+    </FluentStack>
+
+    <FluentCard Style="padding: 0px;">
+        @if (KategoriListesi == null)
+        {
+            <FluentProgressRing Style="margin: 20px;">Yükleniyor...</FluentProgressRing>
+        }
+        else
+        {
+            <FluentDataGrid Items="@KategoriListesi" TGridItem="Kategoriler" ResizableColumns="true">
+                <PropertyColumn Property="@(k => k.KategoriNo)" Title="ID" Sortable="true" />
+                <PropertyColumn Property="@(k => k.KategoriAd)" Title="Kategori Adı" Sortable="true" />
+
+                <TemplateColumn Title="İşlemler" Align="Align.End">
+                    <FluentStack HorizontalGap="5">
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())"
+                                      OnClick="@(() => NavManager.NavigateTo($"/kategoriler/edit/{context.KategoriNo}"))" />
+
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
+                                      Color="Color.Error"
+                                      OnClick="@(() => NavManager.NavigateTo($"/kategoriler/delete/{context.KategoriNo}"))" />
+                    </FluentStack>
+                </TemplateColumn>
+            </FluentDataGrid>
+        }
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private IQueryable<Kategoriler>? KategoriListesi;
+
+    protected override void OnInitialized() => VerileriYukle();
+
+    private void VerileriYukle()
+    {
+        KategoriListesi = DbContext.Kategorilers.AsNoTracking().AsQueryable();
+    }
+}

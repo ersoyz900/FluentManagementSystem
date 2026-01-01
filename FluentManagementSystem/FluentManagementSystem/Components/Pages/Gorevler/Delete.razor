@@ -1,0 +1,102 @@
+﻿@page "/gorevler/delete/{GorevNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Görevi Sil</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+
+    <FluentBreadcrumb>
+        <FluentBreadcrumbItem OnClick="@(() => NavManager.NavigateTo("/gorevler"))">Görev Listesi</FluentBreadcrumbItem>
+        <FluentBreadcrumbItem>Silme Onayı</FluentBreadcrumbItem>
+    </FluentBreadcrumb>
+
+    <FluentLabel Typo="Typography.H3" Color="Color.Error">Görevi Sil</FluentLabel>
+
+    @if (silinecekGorev == null)
+    {
+        <FluentProgressRing>Veri yükleniyor...</FluentProgressRing>
+    }
+    else
+    {
+        @* Hocanın istediği gibi: Tamamen Fluent bileşenleri *@
+        <FluentCard Style="max-width: 500px; padding: 25px;">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                <FluentLabel Typo="Typography.Body">
+                    Aşağıdaki görev <strong>kalıcı olarak silinecektir.</strong> Bu işlemi onaylıyor musunuz?
+                </FluentLabel>
+
+                <FluentDivider Style="width: 100%;" />
+
+                @* Görev Detayları *@
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="5">
+                    @* Typography.Caption yerine Typography.Body kullanıldı *@
+                    <FluentLabel Typo="Typography.Body" Style="font-weight: bold; color: var(--neutral-foreground-hint);">Görev Başlığı:</FluentLabel>
+                    <FluentLabel Typo="Typography.Body">@silinecekGorev.GorevBaslik</FluentLabel>
+
+                    <FluentLabel Typo="Typography.Body" Style="font-weight: bold; color: var(--neutral-foreground-hint); margin-top: 10px;">Bitiş Tarihi:</FluentLabel>
+                    <FluentLabel Typo="Typography.Body">@silinecekGorev.BitisTarihi?.ToString("dd.MM.yyyy")</FluentLabel>
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                    @* BackgroundColor kaldırıldı, Style ile kırmızı renk verildi *@
+                    <FluentButton Appearance="Appearance.Accent"
+                                  Style="background-color: var(--error); border-color: var(--error);"
+                                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
+                                  OnClick="Sil">
+                        Evet, Kaydı Sil
+                    </FluentButton>
+
+                    <FluentButton Appearance="Appearance.Neutral"
+                                  OnClick="@(() => NavManager.NavigateTo("/gorevler"))">
+                        Vazgeç
+                    </FluentButton>
+                </FluentStack>
+
+            </FluentStack>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int GorevNo { get; set; }
+    private Gorevler? silinecekGorev;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // FindAsync kullanımı için DbContext'in hazır olduğundan emin oluyoruz
+        silinecekGorev = await DbContext.Gorevlers.FindAsync(GorevNo);
+
+        if (silinecekGorev == null)
+        {
+            ToastService.ShowError("Kayıt bulunamadı.");
+            NavManager.NavigateTo("/gorevler");
+        }
+    }
+
+    private async Task Sil()
+    {
+        if (silinecekGorev != null)
+        {
+            try
+            {
+                DbContext.Gorevlers.Remove(silinecekGorev);
+                await DbContext.SaveChangesAsync();
+
+                ToastService.ShowSuccess("Görev başarıyla silindi.");
+                NavManager.NavigateTo("/gorevler");
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError("Silme hatası: " + ex.Message);
+            }
+        }
+    }
+}

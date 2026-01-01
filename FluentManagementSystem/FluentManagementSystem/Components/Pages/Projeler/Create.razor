@@ -1,0 +1,50 @@
+﻿@page "/projeler/create"
+@using FluentManagementSystem.Models
+@using Microsoft.FluentUI.AspNetCore.Components
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+
+<PageTitle>Yeni Proje</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentLabel Typo="Typography.H3">Yeni Proje Oluştur</FluentLabel>
+
+    <FluentCard Style="margin-top: 20px; max-width: 600px; padding: 20px;">
+        <EditForm Model="@proje" OnValidSubmit="Kaydet">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                <FluentTextField @bind-Value="proje.ProjeAd" Label="Proje Adı" Required="true" Style="width: 100%;" />
+
+                <FluentDatePicker @bind-Value="proje.OlusturmaTarihi" Label="Başlangıç Tarihi" Style="width: 100%;" />
+
+                @* Geçici değişken kullanımı *@
+                <FluentCheckbox @bind-Value="aktifMiGecici" Label="Proje Aktif Mi?" />
+
+                <FluentDivider Style="width: 100%; margin: 10px 0;" />
+
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                    <FluentButton Type="ButtonType.Submit"
+                                  Appearance="Appearance.Accent"
+                                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                        Projeyi Kaydet
+                    </FluentButton>
+                    <FluentButton OnClick="@(() => NavManager.NavigateTo("/projeler"))">İptal</FluentButton>
+                </FluentStack>
+
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private Projeler proje = new() { OlusturmaTarihi = DateTime.Now };
+    private bool aktifMiGecici = true;
+
+    private async Task Kaydet()
+    {
+        proje.AktifMi = aktifMiGecici;
+        DbContext.Projelers.Add(proje);
+        await DbContext.SaveChangesAsync();
+        NavManager.NavigateTo("/projeler");
+    }
+}

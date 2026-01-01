@@ -1,0 +1,108 @@
+﻿@page "/gorevler/create"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Yeni Görev</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+
+    @* Geri dönüş için Breadcrumb eklemek kullanıcı deneyimini artırır *@
+    <FluentBreadcrumb>
+        <FluentBreadcrumbItem OnClick="@(() => NavManager.NavigateTo("/gorevler"))">Görev Listesi</FluentBreadcrumbItem>
+        <FluentBreadcrumbItem>Yeni Görev Tanımla</FluentBreadcrumbItem>
+    </FluentBreadcrumb>
+
+    @* Typography hatası riskine karşı FluentLabel kullanıyoruz *@
+    <FluentLabel Typo="Typography.H3">Yeni Görev Tanımla</FluentLabel>
+
+    <FluentCard Style="max-width: 600px; padding: 25px;">
+        <EditForm Model="@yeniGorev" OnValidSubmit="Kaydet">
+            <DataAnnotationsValidator />
+
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                @* Başlık *@
+                <FluentTextField @bind-Value="yeniGorev.GorevBaslik"
+                                 Label="Görev Başlığı"
+                                 Required="true"
+                                 Style="width: 100%;"
+                                 Placeholder="Görevin kısa adını giriniz..." />
+
+                @* Açıklama *@
+                <FluentTextArea @bind-Value="yeniGorev.GorevAciklama"
+                                Label="Açıklama"
+                                Rows="4"
+                                Style="width: 100%;" />
+
+                @* Proje ve Tarih Seçimi *@
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                    <FluentSelect Label="Bağlı Proje"
+                                  Items="@projeler"
+                                  OptionText="@(i => i.ProjeAd)"
+                                  OptionValue="@(i => i.ProjeNo.ToString())"
+                                  @bind-Value="secilenProjeId"
+                                  Placeholder="Proje Seçin..."
+                                  Style="min-width: 250px;" />
+
+                    <FluentDatePicker @bind-Value="yeniGorev.BitisTarihi"
+                                      Label="Bitiş Tarihi"
+                                      Style="min-width: 200px;" />
+                </FluentStack>
+
+                <FluentDivider Style="width: 100%; margin: 10px 0;" />
+
+                @* Aksiyon Butonları *@
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                    <FluentButton Type="ButtonType.Submit"
+                                  Appearance="Appearance.Accent"
+                                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                        Görevi Kaydet
+                    </FluentButton>
+
+                    <FluentButton OnClick="@(() => NavManager.NavigateTo("/gorevler"))">
+                        İptal
+                    </FluentButton>
+                </FluentStack>
+
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private Gorevler yeniGorev = new() { BitisTarihi = DateTime.Now.AddDays(1) };
+    private List<Projeler> projeler = new();
+    private string? secilenProjeId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Veritabanından projeleri çekiyoruz (AsNoTracking performansı artırır)
+        projeler = await DbContext.Projelers.AsNoTracking().ToListAsync();
+    }
+
+    private async Task Kaydet()
+    {
+        try
+        {
+            // Dropdown'dan gelen string ID'yi int'e çevirip modele atıyoruz
+            if (int.TryParse(secilenProjeId, out var pId))
+            {
+                yeniGorev.RefProjeNo = pId;
+            }
+
+            DbContext.Gorevlers.Add(yeniGorev);
+            await DbContext.SaveChangesAsync();
+
+            ToastService.ShowSuccess("Yeni görev başarıyla oluşturuldu.");
+            NavManager.NavigateTo("/gorevler");
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError("Kayıt sırasında bir hata oluştu: " + ex.Message);
+        }
+    }
+}

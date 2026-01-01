@@ -1,0 +1,60 @@
+﻿@page "/kategoriler/delete/{KategoriNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Kategori Sil</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentLabel Typo="Typography.H3" Color="Color.Error">Kategoriyi Sil</FluentLabel>
+
+    @if (silinecekKategori == null)
+    {
+        <FluentProgressRing />
+    }
+    else
+    {
+        <FluentCard Style="max-width: 500px; padding: 25px; border-left: 6px solid var(--error);">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+                <FluentLabel Typo="Typography.Body">
+                    <strong>@silinecekKategori.KategoriAd</strong> kategorisini silmek istediğinize emin misiniz?
+                </FluentLabel>
+
+                <FluentStack HorizontalGap="10">
+                    <FluentButton Appearance="Appearance.Accent" BackgroundColor="var(--error)" OnClick="Sil">Sil</FluentButton>
+                    <FluentButton OnClick="@(() => NavManager.NavigateTo("/kategoriler"))">İptal</FluentButton>
+                </FluentStack>
+            </FluentStack>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int KategoriNo { get; set; }
+    private Kategoriler? silinecekKategori;
+
+    protected override async Task OnInitializedAsync()
+    {
+        silinecekKategori = await DbContext.Kategorilers.FindAsync(KategoriNo);
+    }
+
+    private async Task Sil()
+    {
+        if (silinecekKategori != null)
+        {
+            try
+            {
+                DbContext.Kategorilers.Remove(silinecekKategori);
+                await DbContext.SaveChangesAsync();
+                ToastService.ShowSuccess("Kategori silindi.");
+                NavManager.NavigateTo("/kategoriler");
+            }
+            catch
+            {
+                ToastService.ShowError("Bu kategori kullanımda olduğu için silinemez.");
+            }
+        }
+    }
+}

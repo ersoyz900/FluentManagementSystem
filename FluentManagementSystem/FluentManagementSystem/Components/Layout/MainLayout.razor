@@ -1,0 +1,82 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.FluentUI.AspNetCore.Components
+@inject NavigationManager NavManager
+
+<PageTitle>Proje Yönetim Sistemi</PageTitle>
+
+<FluentLayout>
+    @* Üst Menü Çubuğu *@
+    <FluentHeader>
+        <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalGap="15">
+            <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size24.AppGeneric())"
+                        Color="@Color.Fill" />
+
+            <FluentLabel Typo="Typography.PaneHeader" Style="color: white;">
+                Fluent Management System
+            </FluentLabel>
+        </FluentStack>
+
+        <FluentSpacer />
+
+        <FluentButton Appearance="Appearance.Stealth"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.PersonCircle())"
+                      Style="color: white;">
+            Kullanıcı Paneli
+        </FluentButton>
+    </FluentHeader>
+
+    @* Ana Gövde *@
+    <FluentStack Orientation="Orientation.Horizontal"
+                 Width="100%"
+                 Style="height: calc(100vh - 85px); overflow: hidden;">
+
+        @* Sol Navigasyon Menüsü *@
+        <FluentStack Orientation="Orientation.Vertical"
+                     Width="250px"
+                     Style="border-right: 1px solid var(--neutral-stroke-rest); height: 100%; background-color: var(--neutral-layer-1);">
+            <NavMenu />
+        </FluentStack>
+
+        @* Sayfa İçerik Alanı *@
+        <FluentBodyContent Style="height: 100%; width: 100%; overflow-y: auto;">
+            <div style="padding: 25px;">
+                @Body
+            </div>
+        </FluentBodyContent>
+
+    </FluentStack>
+
+    @* Alt Bilgi Çubuğu *@
+    <FluentFooter Style="height: 35px; border-top: 1px solid var(--neutral-stroke-rest); padding: 0 20px;">
+        <FluentAnchor Href="https://www.fluentui-blazor.net" Target="_blank" Appearance="Appearance.Hypertext">
+            Dokümantasyon
+        </FluentAnchor>
+
+        <FluentSpacer />
+
+        <FluentLabel Typo="Typography.Body">
+            232 Proje Yönetimi © 2026
+        </FluentLabel>
+    </FluentFooter>
+</FluentLayout>
+
+@* Global Bileşenler (Bildirimler ve Diyaloglar için şart) *@
+<FluentToastProvider />
+<FluentDialogProvider />
+<FluentTooltipProvider />
+<FluentMessageBarProvider />
+
+<style>
+    fluent-header {
+        background-color: var(--accent-fill-rest) !important;
+        height: 50px;
+    }
+
+    fluent-body-content {
+        background-color: var(--neutral-layer-2);
+    }
+
+    fluent-footer {
+        background-color: var(--neutral-layer-1);
+    }
+</style>

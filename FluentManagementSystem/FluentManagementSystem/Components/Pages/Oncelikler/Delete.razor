@@ -1,0 +1,60 @@
+﻿@page "/oncelikler/edit/{OncelikNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+
+<PageTitle>Öncelik Düzenle</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentLabel Typo="Typography.H3">Öncelik Bilgilerini Güncelle</FluentLabel>
+
+    @if (oncelik == null)
+    {
+        <FluentProgressRing>Yükleniyor...</FluentProgressRing>
+    }
+    else
+    {
+        <FluentCard Style="max-width: 450px; padding: 25px;">
+            <EditForm Model="@oncelik" OnValidSubmit="Guncelle">
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                    <FluentTextField @bind-Value="oncelik.OncelikAd" Label="Öncelik Seviyesi" Required="true" Style="width: 100%;" />
+
+                    <FluentTextField @bind-Value="oncelik.RenkKodu" Label="Renk (HEX Kodu)" Style="width: 100%;" />
+
+                    <FluentDivider Style="width: 100%; margin: 10px 0;" />
+
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                        <FluentButton Type="ButtonType.Submit"
+                                      Appearance="Appearance.Accent"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                            Değişiklikleri Kaydet
+                        </FluentButton>
+                        <FluentButton OnClick="@(() => NavManager.NavigateTo("/oncelikler"))">İptal</FluentButton>
+                    </FluentStack>
+                </FluentStack>
+            </EditForm>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int OncelikNo { get; set; }
+    private OncelikDurumlari? oncelik;
+
+    protected override async Task OnInitializedAsync()
+    {
+        oncelik = await DbContext.OncelikDurumlaris.FindAsync(OncelikNo);
+    }
+
+    private async Task Guncelle()
+    {
+        if (oncelik != null)
+        {
+            await DbContext.SaveChangesAsync();
+            NavManager.NavigateTo("/oncelikler");
+        }
+    }
+}

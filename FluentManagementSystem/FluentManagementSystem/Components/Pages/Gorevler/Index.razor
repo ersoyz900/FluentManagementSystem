@@ -1,0 +1,95 @@
+﻿@page "/gorevler"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject IDialogService DialogService
+@inject IToastService ToastService
+@inject NavigationManager NavManager
+
+<PageTitle>Görev Yönetimi</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        @* Hata devam ederse FluentLabel kullan *@
+        <FluentLabel Typo="Typography.H3">Görev Yönetimi</FluentLabel>
+        <FluentSpacer />
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Add())"
+                      OnClick="@(() => NavManager.NavigateTo("/gorevler/create"))">
+            Yeni Görev Tanımla
+        </FluentButton>
+    </FluentStack>
+
+    <FluentCard Style="padding: 0px;">
+        @if (GorevListesi == null)
+        {
+            <FluentProgressRing Style="margin: 20px;">Yükleniyor...</FluentProgressRing>
+        }
+        else
+        {
+            <FluentDataGrid Items="@GorevListesi" TGridItem="Gorevler" ResizableColumns="true" Pagination="@pagination">
+                <PropertyColumn Property="@(g => g.GorevBaslik)" Title="Başlık" Sortable="true" />
+
+                <TemplateColumn Title="Proje">
+                    <FluentBadge Appearance="Appearance.Neutral">@context.RefProjeNoNavigation?.ProjeAd</FluentBadge>
+                </TemplateColumn>
+
+                <PropertyColumn Property="@(g => g.BitisTarihi)" Title="Bitiş Tarihi" Format="dd.MM.yyyy" />
+
+                <TemplateColumn Title="İşlemler" Align="Align.End">
+                    <FluentStack HorizontalGap="5">
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())"
+                                      OnClick="@(() => NavManager.NavigateTo($"/gorevler/edit/{context.GorevNo}"))" />
+
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
+                                      Color="Color.Error"
+                                      OnClick="@(() => SilOnayiAl(context))" />
+                    </FluentStack>
+                </TemplateColumn>
+            </FluentDataGrid>
+            <FluentPaginator State="@pagination" />
+        }
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    private IQueryable<Gorevler>? GorevListesi;
+
+    protected override void OnInitialized()
+    {
+        VerileriYukle();
+    }
+
+    private void VerileriYukle()
+    {
+        try
+        {
+            GorevListesi = DbContext.Gorevlers
+                .Include(g => g.RefProjeNoNavigation)
+                .AsNoTracking()
+                .AsQueryable();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Hata: " + ex.Message);
+        }
+    }
+
+    private async Task SilOnayiAl(Gorevler gorev)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync($"{gorev.GorevBaslik} silinecek. Emin misiniz?", "Evet", "Hayır", "Silme Onayı");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            DbContext.Gorevlers.Remove(gorev);
+            await DbContext.SaveChangesAsync();
+            ToastService.ShowSuccess("Görev başarıyla silindi.");
+            VerileriYukle();
+        }
+    }
+}

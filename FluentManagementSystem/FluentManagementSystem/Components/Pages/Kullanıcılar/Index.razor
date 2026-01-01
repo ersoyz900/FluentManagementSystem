@@ -1,0 +1,73 @@
+﻿@page "/kullanicilar"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject IDialogService DialogService
+@inject NavigationManager NavManager
+
+<PageTitle>Kullanıcı Yönetimi</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentLabel Typo="Typography.H3">Sistem Kullanıcıları</FluentLabel>
+        <FluentSpacer />
+        <FluentButton Appearance="Appearance.Accent"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Add())"
+                      OnClick="@(() => NavManager.NavigateTo("/kullanicilar/create"))">
+            Yeni Kullanıcı Ekle
+        </FluentButton>
+    </FluentStack>
+
+    <FluentCard Style="padding: 0;">
+        @if (KullaniciListesi == null)
+        {
+            <FluentProgressRing Style="margin: 20px;">Yükleniyor...</FluentProgressRing>
+        }
+        else
+        {
+            <FluentDataGrid Items="@KullaniciListesi" TGridItem="Kullanicilar" ResizableColumns="true">
+                <PropertyColumn Property="@(k => k.KullaniciNo)" Title="No" Sortable="true" />
+                <PropertyColumn Property="@(k => k.AdSoyad)" Title="Ad Soyad" Sortable="true" />
+                <PropertyColumn Property="@(k => k.Eposta)" Title="E-Posta" />
+
+                <TemplateColumn Title="İşlemler" Align="Align.End">
+                    <FluentStack HorizontalGap="5">
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())"
+                                      OnClick="@(() => NavManager.NavigateTo($"/kullanicilar/edit/{context.KullaniciNo}"))" />
+
+                        <FluentButton Appearance="Appearance.Stealth"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
+                                      Color="Color.Error"
+                                      OnClick="@(() => SilOnayiAl(context))" />
+                    </FluentStack>
+                </TemplateColumn>
+            </FluentDataGrid>
+        }
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private IQueryable<Kullanicilar>? KullaniciListesi;
+
+    protected override void OnInitialized() => VerileriYukle();
+
+    private void VerileriYukle()
+    {
+        KullaniciListesi = DbContext.Kullanicilars.AsNoTracking().AsQueryable();
+    }
+
+    private async Task SilOnayiAl(Kullanicilar kullanici)
+    {
+        var dialog = await DialogService.ShowConfirmationAsync($"{kullanici.AdSoyad} silinecek. Emin misiniz?", "Evet", "İptal", "Kullanıcı Sil");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            DbContext.Kullanicilars.Remove(kullanici);
+            await DbContext.SaveChangesAsync();
+            VerileriYukle();
+        }
+    }
+}

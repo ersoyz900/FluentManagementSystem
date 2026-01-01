@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+
+    @* Fluent UI Temel Stilleri *@
+    <link href="_content/Microsoft.FluentUI.AspNetCore.Components/css/reboot.css" rel="stylesheet" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="FluentManagementSystem.styles.css" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+
+    @* Sayfa başlıkları ve meta verileri için etkileşim modu *@
+    <HeadOutlet @rendermode="InteractiveAuto" />
+</head>
+
+<body>
+    @* Tüm sayfaların tıklanabilir ve dinamik olması için RenderMode şart *@
+    <Routes @rendermode="InteractiveAuto" />
+
+    @* Blazor ve Fluent UI için gerekli çalışma dosyaları *@
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/Microsoft.FluentUI.AspNetCore.Components/Microsoft.FluentUI.AspNetCore.Components.lib.module.js" type="module"></script>
+</body>
+
+</html>

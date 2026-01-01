@@ -1,0 +1,62 @@
+﻿@rendermode InteractiveAuto
+@using Microsoft.FluentUI.AspNetCore.Components
+
+<FluentNavMenu Width="250"
+               Collapsible="true"
+               Title="Yönetim Paneli"
+               @bind-Expanded="expanded">
+
+    @* Ana Sayfa *@
+    <FluentNavLink Href="/"
+                   Match="NavLinkMatch.All"
+                   Icon="@(new Icons.Regular.Size20.Home())"
+                   IconColor="Color.Accent">
+        Ana Sayfa
+    </FluentNavLink>
+
+    <FluentDivider Style="margin: 8px 0;" />
+
+    @* Varlıklar (Entity) *@
+    <FluentNavLink Href="/projeler"
+                   Icon="@(new Icons.Regular.Size20.Folder())"
+                   IconColor="Color.Accent">
+        Projeler
+    </FluentNavLink>
+
+    <FluentNavLink Href="/gorevler"
+                   Icon="@(new Icons.Regular.Size20.ClipboardTask())"
+                   IconColor="Color.Accent">
+        Görevler
+    </FluentNavLink>
+
+    @* Kullanıcılar Modülü - Yeni Eklendi *@
+    <FluentNavLink Href="/kullanicilar"
+                   Icon="@(new Icons.Regular.Size20.People())"
+                   IconColor="Color.Accent">
+        Kullanıcılar
+    </FluentNavLink>
+
+    <FluentDivider Style="margin: 8px 0;" />
+
+    @* Ayarlar Grubu *@
+    <FluentNavGroup Title="Tanımlamalar"
+                    Icon="@(new Icons.Regular.Size20.Settings())"
+                    IconColor="Color.Accent">
+
+        <FluentNavLink Href="/oncelikler"
+                       Icon="@(new Icons.Regular.Size20.Flag())">
+            Öncelikler
+        </FluentNavLink>
+
+        <FluentNavLink Href="/kategoriler"
+                       Icon="@(new Icons.Regular.Size20.Tag())">
+            Kategoriler
+        </FluentNavLink>
+
+    </FluentNavGroup>
+
+</FluentNavMenu>
+
+@code {
+    private bool expanded = true;
+}

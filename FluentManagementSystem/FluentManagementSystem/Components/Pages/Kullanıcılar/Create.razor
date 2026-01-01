@@ -1,0 +1,52 @@
+﻿@page "/kullanicilar/create"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Yeni Kullanıcı</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentBreadcrumb>
+        <FluentBreadcrumbItem OnClick="@(() => NavManager.NavigateTo("/kullanicilar"))">Kullanıcı Listesi</FluentBreadcrumbItem>
+        <FluentBreadcrumbItem>Yeni Tanımlama</FluentBreadcrumbItem>
+    </FluentBreadcrumb>
+
+    <FluentLabel Typo="Typography.H3">Yeni Kullanıcı Tanımla</FluentLabel>
+
+    <FluentCard Style="max-width: 500px; padding: 25px;">
+        <EditForm Model="@yeniKullanici" OnValidSubmit="Kaydet">
+            <DataAnnotationsValidator />
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+
+                <FluentTextField @bind-Value="yeniKullanici.AdSoyad" Label="Ad Soyad" Required="true" Style="width: 100%;" />
+
+                <FluentTextField @bind-Value="yeniKullanici.Eposta" Label="E-Posta Adresi" TextFieldType="TextFieldType.Email" Style="width: 100%;" />
+
+                <FluentDivider Style="width: 100%;" />
+
+                <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                    <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"
+                                  IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                        Kaydet
+                    </FluentButton>
+                    <FluentButton OnClick="@(() => NavManager.NavigateTo("/kullanicilar"))">İptal</FluentButton>
+                </FluentStack>
+
+            </FluentStack>
+        </EditForm>
+    </FluentCard>
+</FluentStack>
+
+@code {
+    private Kullanicilar yeniKullanici = new();
+
+    private async Task Kaydet()
+    {
+        DbContext.Kullanicilars.Add(yeniKullanici);
+        await DbContext.SaveChangesAsync();
+        ToastService.ShowSuccess("Yeni kullanıcı oluşturuldu.");
+        NavManager.NavigateTo("/kullanicilar");
+    }
+}

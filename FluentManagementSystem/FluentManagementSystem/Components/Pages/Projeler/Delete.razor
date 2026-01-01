@@ -1,0 +1,80 @@
+﻿@page "/projeler/delete/{ProjeNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject AppDbContext DbContext
+@inject NavigationManager NavManager
+
+<PageTitle>Projeyi Sil</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentLabel Typo="Typography.H3" Color="Color.Error">Projeyi Sil</FluentLabel>
+        <FluentSpacer />
+        <FluentButton Appearance="Appearance.Stealth"
+                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.ArrowLeft())"
+                      OnClick="@(() => NavManager.NavigateTo("/projeler"))">
+            Vazgeç
+        </FluentButton>
+    </FluentStack>
+
+    <FluentDivider Style="width: 100%;" />
+
+    @if (proje == null)
+    {
+        <FluentProgressRing>Yükleniyor...</FluentProgressRing>
+    }
+    else
+    {
+        <FluentCard Style="max-width: 500px; padding: 25px; border-left: 6px solid var(--error);">
+            <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
+                <FluentLabel Typo="Typography.Body">
+                    Aşağıdaki projeyi silmek üzeresiniz. Bu işlem geri alınamaz. Devam etmek istiyor musunuz?
+                </FluentLabel>
+
+                <FluentCard Appearance="Appearance.Neutral" Style="padding: 15px; background-color: var(--neutral-layer-2);">
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="5">
+                        <FluentLabel><strong>Proje No:</strong> @proje.ProjeNo</FluentLabel>
+                        <FluentLabel><strong>Proje Adı:</strong> @proje.ProjeAd</FluentLabel>
+                    </FluentStack>
+                </FluentCard>
+
+                <FluentStack HorizontalGap="10">
+                    <FluentButton Appearance="Appearance.Accent"
+                                  BackgroundColor="var(--error)"
+                                  OnClick="SilmeyiTamamla">
+                        Evet, Sil
+                    </FluentButton>
+                    <FluentButton OnClick="@(() => NavManager.NavigateTo("/projeler"))">Hayır, İptal</FluentButton>
+                </FluentStack>
+            </FluentStack>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int ProjeNo { get; set; }
+    private Projeler? proje;
+
+    protected override async Task OnInitializedAsync()
+    {
+        proje = await DbContext.Projelers.FindAsync(ProjeNo);
+    }
+
+    private async Task SilmeyiTamamla()
+    {
+        if (proje != null)
+        {
+            try
+            {
+                DbContext.Projelers.Remove(proje);
+                await DbContext.SaveChangesAsync();
+                NavManager.NavigateTo("/projeler");
+            }
+            catch (Exception)
+            {
+                // İlişkili veri (görevler gibi) varsa hata yönetimi yapılabilir
+            }
+        }
+    }
+}

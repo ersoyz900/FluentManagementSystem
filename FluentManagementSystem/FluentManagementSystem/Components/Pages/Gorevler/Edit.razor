@@ -1,0 +1,126 @@
+﻿@page "/gorevler/edit/{GorevNo:int}"
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@using FluentManagementSystem.Models
+@inject FluentManagementSystem.Models.AppDbContext DbContext
+@inject NavigationManager NavManager
+@inject IToastService ToastService
+
+<PageTitle>Görev Düzenle</PageTitle>
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Padding="20">
+
+    @* Navigasyon Kolaylığı *@
+    <FluentBreadcrumb>
+        <FluentBreadcrumbItem OnClick="@(() => NavManager.NavigateTo("/gorevler"))">Görev Listesi</FluentBreadcrumbItem>
+        <FluentBreadcrumbItem>Düzenle</FluentBreadcrumbItem>
+    </FluentBreadcrumb>
+
+    @* Hata devam ederse FluentTypography yerine FluentLabel kullanabilirsin *@
+    <FluentLabel Typo="Typography.H3">Görevi Düzenle</FluentLabel>
+
+    @if (guncelGorev == null)
+    {
+        <FluentStack VerticalAlignment="VerticalAlignment.Center" HorizontalAlignment="HorizontalAlignment.Center">
+            <FluentProgressRing>Veri yükleniyor...</FluentProgressRing>
+        </FluentStack>
+    }
+    else
+    {
+        <FluentCard Style="max-width: 650px; padding: 25px;">
+            <EditForm Model="@guncelGorev" OnValidSubmit="Kaydet">
+                <DataAnnotationsValidator />
+
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
+
+                    @* Başlık *@
+                    <FluentTextField @bind-Value="guncelGorev.GorevBaslik"
+                                     Label="Görev Başlığı"
+                                     Required="true"
+                                     Style="width: 100%;" />
+
+                    @* Açıklama *@
+                    <FluentTextArea @bind-Value="guncelGorev.GorevAciklama"
+                                    Label="Görev Açıklaması"
+                                    Rows="5"
+                                    Style="width: 100%;" />
+
+                    @* İlişkili Veriler: Proje ve Tarih *@
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="15">
+                        <FluentSelect Label="Bağlı Proje"
+                                      Items="@projeler"
+                                      OptionText="@(i => i.ProjeAd)"
+                                      OptionValue="@(i => i.ProjeNo.ToString())"
+                                      @bind-Value="secilenProjeId"
+                                      Style="min-width: 250px;" />
+
+                        <FluentDatePicker @bind-Value="guncelGorev.BitisTarihi"
+                                          Label="Bitiş Tarihi"
+                                          Style="min-width: 200px;" />
+                    </FluentStack>
+
+                    <FluentDivider Style="width: 100%;" />
+
+                    @* İşlem Butonları *@
+                    <FluentStack Orientation="Orientation.Horizontal" HorizontalGap="10">
+                        <FluentButton Type="ButtonType.Submit"
+                                      Appearance="Appearance.Accent"
+                                      IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Save())">
+                            Değişiklikleri Kaydet
+                        </FluentButton>
+
+                        <FluentButton OnClick="@(() => NavManager.NavigateTo("/gorevler"))">
+                            İptal
+                        </FluentButton>
+                    </FluentStack>
+
+                </FluentStack>
+            </EditForm>
+        </FluentCard>
+    }
+</FluentStack>
+
+@code {
+    [Parameter] public int GorevNo { get; set; }
+
+    private Gorevler? guncelGorev;
+    private List<Projeler> projeler = new();
+    private string? secilenProjeId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Projeleri dropdown için yüklüyoruz
+        projeler = await DbContext.Projelers.AsNoTracking().ToListAsync();
+
+        // Düzenlenecek görevi buluyoruz
+        guncelGorev = await DbContext.Gorevlers.FindAsync(GorevNo);
+
+        if (guncelGorev != null)
+        {
+            secilenProjeId = guncelGorev.RefProjeNo.ToString();
+        }
+    }
+
+    private async Task Kaydet()
+    {
+        if (guncelGorev != null)
+        {
+            try
+            {
+                // Seçilen proje ID'sini modele geri aktarıyoruz
+                if (int.TryParse(secilenProjeId, out var pId))
+                {
+                    guncelGorev.RefProjeNo = pId;
+                }
+
+                await DbContext.SaveChangesAsync();
+                ToastService.ShowSuccess("Görev başarıyla güncellendi.");
+                NavManager.NavigateTo("/gorevler");
+            }
+            catch (Exception ex)
+            {
+                ToastService.ShowError("Hata oluştu: " + ex.Message);
+            }
+        }
+    }
+}
